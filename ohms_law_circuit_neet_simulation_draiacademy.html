@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEET Physics Simulation: Ohm's Law Circuit</title>
+  <style>
+    :root {
+      --bg: #f4f8ff;
+      --panel: #ffffff;
+      --ink: #102033;
+      --muted: #637083;
+      --blue: #1769ff;
+      --green: #0f9d58;
+      --orange: #f57c00;
+      --red: #d93025;
+      --purple: #7b1fa2;
+      --cyan: #00a9e8;
+      --line: #dbe6f6;
+      --soft: #f7faff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #eef5ff, #ffffff);
+      color: var(--ink);
+    }
+
+    header {
+      padding: 24px 18px;
+      text-align: center;
+      background: linear-gradient(135deg, #061d49, #0d6efd);
+      color: white;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(26px, 4vw, 44px);
+      letter-spacing: 0.3px;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.94;
+      font-size: 16px;
+    }
+
+    .wrap {
+      max-width: 1240px;
+      margin: 22px auto;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(16, 32, 51, 0.08);
+      overflow: hidden;
+    }
+
+    .canvas-card { padding: 14px; }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid #e6eefb;
+    }
+
+    .controls { padding: 18px; }
+
+    h2 { margin: 0 0 14px; font-size: 20px; }
+
+    .mode-box {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: #f7faff;
+      border: 1px solid #e5eefb;
+      border-radius: 14px;
+    }
+
+    .control {
+      margin-bottom: 15px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #d8e3f2;
+    }
+
+    .control:last-of-type {
+      border-bottom: 0;
+      margin-bottom: 12px;
+      padding-bottom: 0;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    label span { color: var(--blue); white-space: nowrap; }
+
+    input[type="range"], select {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    select {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #cbd9ec;
+      background: white;
+      color: var(--ink);
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .toggle-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      background: #f7faff;
+      border: 1px solid #e5eefb;
+      border-radius: 12px;
+      padding: 9px 10px;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      padding: 11px 10px;
+      border-radius: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      color: white;
+      background: var(--blue);
+      box-shadow: 0 8px 16px rgba(23, 105, 255, 0.2);
+    }
+
+    button:nth-child(2) { background: var(--orange); }
+    button:nth-child(3) { background: var(--red); }
+    button:nth-child(4) { background: var(--green); }
+    button:nth-child(5) { background: var(--purple); }
+    button:nth-child(6) { background: #335c81; }
+    button:nth-child(7) { background: #4b5563; grid-column: 1 / -1; }
+
+    .hint {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 12px;
+      background: #eef6ff;
+      border: 1px solid #d8eaff;
+      color: #0b45a0;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: #f4f7fb;
+      border: 1px solid #dde8f6;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .blue { color: var(--blue); }
+    .green { color: var(--green); }
+    .orange { color: var(--orange); }
+    .red { color: var(--red); }
+    .purple { color: var(--purple); }
+    .cyan { color: var(--cyan); }
+
+    .content-grid {
+      max-width: 1240px;
+      margin: 0 auto 34px;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .data, .formula, .questions, .traps, .explain { padding: 18px; }
+
+    .status {
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 16px;
+      text-align: center;
+      background: #eef6ff;
+      color: #0b45a0;
+      border: 1px solid #d8eaff;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat {
+      background: var(--soft);
+      border: 1px solid #e5eefb;
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .stat b {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .stat span {
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .formula p, .questions li, .traps li, .explain li { line-height: 1.58; }
+
+    .formula-box {
+      background: #f8fbff;
+      border: 1px solid #deebff;
+      border-radius: 14px;
+      padding: 14px;
+      margin: 12px 0;
+      display: block;
+    }
+
+    .formula-box.hidden { display: none; }
+
+    .formula-box code {
+      display: block;
+      font-size: 17px;
+      padding: 4px 0;
+      color: #0b45a0;
+      white-space: normal;
+      font-weight: 800;
+    }
+
+    ol, ul { margin: 0; padding-left: 22px; }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 0 16px 26px;
+      font-size: 14px;
+    }
+
+    footer strong { color: #0b45a0; }
+
+    @media (max-width: 940px) {
+      .wrap, .content-grid { grid-template-columns: 1fr; }
+      .buttons { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Ohm's Law Circuit Simulator</h1>
+    <p>NEET Physics Interactive Lab: voltage, current, resistance, power, series-parallel circuits, and V-I graph</p>
+  </header>
+
+  <main class="wrap">
+    <section class="card canvas-card">
+      <canvas id="simCanvas" width="960" height="690"></canvas>
+      <div class="legend">
+        <span class="pill blue">Blue wire: circuit path</span>
+        <span class="pill green">Green dots: conventional current</span>
+        <span class="pill orange">Orange dots: electron flow</span>
+        <span class="pill red">Red: voltage/battery</span>
+        <span class="pill purple">Purple: V-I graph</span>
+        <span class="pill cyan">Watermark: Dr AI Academy</span>
+      </div>
+    </section>
+
+    <aside class="card controls">
+      <h2>Controls</h2>
+
+      <div class="mode-box">
+        <label>Circuit type</label>
+        <select id="circuitType">
+          <option value="single">Single resistor circuit</option>
+          <option value="series">Series combination</option>
+          <option value="parallel">Parallel combination</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label>Battery voltage, V <span id="voltageVal">12 V</span></label>
+        <input id="voltage" type="range" min="1" max="30" step="1" value="12" />
+      </div>
+
+      <div class="control">
+        <label>Resistance, R <span id="resistanceVal">6 Ω</span></label>
+        <input id="resistance" type="range" min="1" max="50" step="1" value="6" />
+      </div>
+
+      <div class="control">
+        <label>Current scale <span id="scaleVal">1.0×</span></label>
+        <input id="currentScale" type="range" min="0.3" max="3" step="0.1" value="1" />
+      </div>
+
+      <div class="control">
+        <label>Number of resistors <span id="countVal">2</span></label>
+        <input id="resistorCount" type="range" min="1" max="4" step="1" value="2" />
+      </div>
+
+      <div class="toggle-row">
+        <label class="toggle"><input id="showElectrons" type="checkbox" checked /> Electron flow</label>
+        <label class="toggle"><input id="showCurrent" type="checkbox" checked /> Current direction</label>
+        <label class="toggle"><input id="showGraph" type="checkbox" checked /> V-I graph</label>
+        <label class="toggle"><input id="showFormula" type="checkbox" checked /> Formulas</label>
+      </div>
+
+      <div class="buttons">
+        <button id="playBtn">Play</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="resetBtn">Reset</button>
+        <button id="addBtn">Add Resistor</button>
+        <button id="removeBtn">Remove Resistor</button>
+        <button id="formulaBtn">Show/Hide Formulas</button>
+        <button id="clearGraphBtn">Clear Graph</button>
+      </div>
+
+      <div class="hint">Tip: Change resistance and observe the slope of the V-I graph. When V is on Y-axis and I is on X-axis, slope = resistance.</div>
+    </aside>
+  </main>
+
+  <section class="content-grid">
+    <section class="card data">
+      <h2>Live Calculations</h2>
+      <div id="status" class="status">Ohm's Law: V = IR. Increase voltage to increase current if resistance is constant.</div>
+      <div class="stats">
+        <div class="stat"><b>Voltage, V</b><span id="voltageOut">--</span></div>
+        <div class="stat"><b>Base resistance, R</b><span id="resistanceOut">--</span></div>
+        <div class="stat"><b>Equivalent resistance</b><span id="reqOut">--</span></div>
+        <div class="stat"><b>Total current, I</b><span id="currentOut">--</span></div>
+        <div class="stat"><b>Power, P = VI</b><span id="powerOut">--</span></div>
+        <div class="stat"><b>P = I²R</b><span id="powerI2ROut">--</span></div>
+        <div class="stat"><b>P = V²/R</b><span id="powerV2ROut">--</span></div>
+        <div class="stat"><b>Resistor detail</b><span id="detailOut">--</span></div>
+      </div>
+    </section>
+
+    <section class="card formula">
+      <h2>Formula Explanation</h2>
+      <p>Ohm's Law is valid for an ohmic conductor when physical conditions like temperature remain constant.</p>
+      <div id="formulaBox" class="formula-box">
+        <code>Ohm's Law: V = IR</code>
+        <code>Current: I = V/R</code>
+        <code>Resistance: R = V/I</code>
+        <code>Power: P = VI = I²R = V²/R</code>
+        <code>Series: Rs = R1 + R2 + R3 + ...</code>
+        <code>Parallel: 1/Rp = 1/R1 + 1/R2 + 1/R3 + ...</code>
+        <code>Series: same current through all resistors.</code>
+        <code>Parallel: same voltage across each branch.</code>
+      </div>
+      <p><b>NEET key:</b> Ammeter is connected in series and voltmeter is connected in parallel.</p>
+    </section>
+
+    <section class="card explain">
+      <h2>Simple NEET Explanation</h2>
+      <ul>
+        <li>Ohm's Law says voltage is directly proportional to current if temperature remains constant.</li>
+        <li>Resistance opposes current flow.</li>
+        <li>If voltage increases and resistance is constant, current increases.</li>
+        <li>If resistance increases and voltage is constant, current decreases.</li>
+        <li>Ammeter is connected in series because it measures current through the circuit.</li>
+        <li>Voltmeter is connected in parallel because it measures potential difference across a component.</li>
+        <li>Conventional current flows from positive terminal to negative terminal.</li>
+        <li>Electrons flow from negative terminal to positive terminal.</li>
+        <li>In series circuits, same current flows through all resistors.</li>
+        <li>In parallel circuits, same voltage appears across all branches.</li>
+      </ul>
+    </section>
+
+    <section class="card traps">
+      <h2>NEET Traps</h2>
+      <ul>
+        <li>Ammeter is always connected in series.</li>
+        <li>Voltmeter is always connected in parallel.</li>
+        <li>Conventional current and electron flow are opposite.</li>
+        <li>Ohm's Law is valid only when physical conditions like temperature remain constant.</li>
+        <li>V-I graph of an ohmic conductor is a straight line.</li>
+        <li>Slope of V-I graph gives resistance if V is on Y-axis and I is on X-axis.</li>
+        <li>In series combination, current is same but voltage divides.</li>
+        <li>In parallel combination, voltage is same but current divides.</li>
+        <li>Equivalent resistance in series is greater than individual resistances.</li>
+        <li>Equivalent resistance in parallel is less than the smallest individual resistance.</li>
+        <li>Higher resistance does not mean higher current; it means lower current for same voltage.</li>
+      </ul>
+    </section>
+
+    <section class="card questions" style="grid-column: 1 / -1; padding: 18px;">
+      <h2>NEET-Style Observation Questions</h2>
+      <ol>
+        <li>What happens to current when voltage is doubled and resistance is constant?</li>
+        <li>What happens to current when resistance is doubled and voltage is constant?</li>
+        <li>Why is ammeter connected in series?</li>
+        <li>Why is voltmeter connected in parallel?</li>
+        <li>What does the slope of V-I graph represent?</li>
+        <li>In series circuit, which quantity remains same: current or voltage?</li>
+        <li>In parallel circuit, which quantity remains same: current or voltage?</li>
+      </ol>
+    </section>
+  </section>
+
+  <footer>
+    <strong>Dr AI Academy</strong> | AI Powered Physics for NEET
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const circuitTypeEl = document.getElementById('circuitType');
+    const voltageEl = document.getElementById('voltage');
+    const resistanceEl = document.getElementById('resistance');
+    const currentScaleEl = document.getElementById('currentScale');
+    const resistorCountEl = document.getElementById('resistorCount');
+    const showElectronsEl = document.getElementById('showElectrons');
+    const showCurrentEl = document.getElementById('showCurrent');
+    const showGraphEl = document.getElementById('showGraph');
+    const showFormulaEl = document.getElementById('showFormula');
+
+    const voltageVal = document.getElementById('voltageVal');
+    const resistanceVal = document.getElementById('resistanceVal');
+    const scaleVal = document.getElementById('scaleVal');
+    const countVal = document.getElementById('countVal');
+
+    const statusEl = document.getElementById('status');
+    const formulaBox = document.getElementById('formulaBox');
+    const voltageOut = document.getElementById('voltageOut');
+    const resistanceOut = document.getElementById('resistanceOut');
+    const reqOut = document.getElementById('reqOut');
+    const currentOut = document.getElementById('currentOut');
+    const powerOut = document.getElementById('powerOut');
+    const powerI2ROut = document.getElementById('powerI2ROut');
+    const powerV2ROut = document.getElementById('powerV2ROut');
+    const detailOut = document.getElementById('detailOut');
+
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const addBtn = document.getElementById('addBtn');
+    const removeBtn = document.getElementById('removeBtn');
+    const formulaBtn = document.getElementById('formulaBtn');
+    const clearGraphBtn = document.getElementById('clearGraphBtn');
+
+    let isPlaying = true;
+    let particleOffset = 0;
+    let lastFrame = null;
+    let graphPoints = [];
+
+    function fmt(num, unit = '') {
+      if (!Number.isFinite(num)) return '--';
+      if (Math.abs(num) >= 1000) return `${num.toExponential(2)} ${unit}`.trim();
+      return `${num.toFixed(2)} ${unit}`.trim();
+    }
+
+    function getParams() {
+      const type = circuitTypeEl.value;
+      const V = Number(voltageEl.value);
+      const R = Number(resistanceEl.value);
+      const scale = Number(currentScaleEl.value);
+      const count = Number(resistorCountEl.value);
+      let req = R;
+      if (type === 'series') req = R * count;
+      if (type === 'parallel') req = R / count;
+      const I = V / req;
+      const P = V * I;
+      const branchCurrent = type === 'parallel' ? V / R : I;
+      const voltageDrop = type === 'series' ? V / count : V;
+      return { type, V, R, scale, count, req, I, P, branchCurrent, voltageDrop };
+    }
+
+    function updateUI(p) {
+      voltageVal.textContent = `${p.V} V`;
+      resistanceVal.textContent = `${p.R} Ω`;
+      scaleVal.textContent = `${p.scale.toFixed(1)}×`;
+      countVal.textContent = `${p.count}`;
+      formulaBox.classList.toggle('hidden', !showFormulaEl.checked);
+
+      voltageOut.textContent = fmt(p.V, 'V');
+      resistanceOut.textContent = fmt(p.R, 'Ω');
+      reqOut.textContent = fmt(p.req, 'Ω');
+      currentOut.textContent = fmt(p.I, 'A');
+      powerOut.textContent = fmt(p.P, 'W');
+      powerI2ROut.textContent = fmt(p.I * p.I * p.req, 'W');
+      powerV2ROut.textContent = fmt((p.V * p.V) / p.req, 'W');
+
+      if (p.type === 'series') {
+        detailOut.textContent = `Each R gets ${p.voltageDrop.toFixed(2)} V; same I flows.`;
+        statusEl.textContent = 'Series circuit: current is same through all resistors, voltage divides.';
+      } else if (p.type === 'parallel') {
+        detailOut.textContent = `Each branch gets ${p.V.toFixed(2)} V; branch I = ${p.branchCurrent.toFixed(2)} A.`;
+        statusEl.textContent = 'Parallel circuit: voltage is same across all branches, current divides.';
+      } else {
+        detailOut.textContent = `Single resistor: I = V/R = ${p.I.toFixed(2)} A.`;
+        statusEl.textContent = 'Single resistor circuit: current follows I = V/R.';
+      }
+    }
+
+    function drawArrow(x1, y1, x2, y2, color, label = '') {
+      const headLen = 11;
+      const a = Math.atan2(y2 - y1, x2 - x1);
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - headLen * Math.cos(a - Math.PI / 6), y2 - headLen * Math.sin(a - Math.PI / 6));
+      ctx.lineTo(x2 - headLen * Math.cos(a + Math.PI / 6), y2 - headLen * Math.sin(a + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+      if (label) {
+        ctx.font = 'bold 13px Arial';
+        ctx.fillText(label, x2 + 7, y2 - 7);
+      }
+      ctx.restore();
+    }
+
+    function drawWirePath(points) {
+      ctx.save();
+      ctx.strokeStyle = '#1769ff';
+      ctx.lineWidth = 5;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function pointOnPolyline(points, t) {
+      const lens = [];
+      let total = 0;
+      for (let i = 0; i < points.length - 1; i++) {
+        const l = Math.hypot(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y);
+        lens.push(l);
+        total += l;
+      }
+      let dist = ((t % 1) + 1) % 1 * total;
+      for (let i = 0; i < lens.length; i++) {
+        if (dist <= lens[i]) {
+          const a = dist / lens[i];
+          return {
+            x: points[i].x + (points[i + 1].x - points[i].x) * a,
+            y: points[i].y + (points[i + 1].y - points[i].y) * a
+          };
+        }
+        dist -= lens[i];
+      }
+      return points[0];
+    }
+
+    function drawParticles(paths, p) {
+      const currentCount = Math.min(24, Math.max(5, Math.round(p.I * 5 * p.scale)));
+      for (const path of paths) {
+        if (showCurrentEl.checked) {
+          ctx.save();
+          ctx.fillStyle = '#0f9d58';
+          for (let i = 0; i < currentCount; i++) {
+            const pt = pointOnPolyline(path, particleOffset + i / currentCount);
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+        if (showElectronsEl.checked) {
+          ctx.save();
+          ctx.fillStyle = '#f57c00';
+          for (let i = 0; i < currentCount; i++) {
+            const pt = pointOnPolyline(path, -particleOffset + i / currentCount);
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+      }
+    }
+
+    function drawBattery(x, y, V) {
+      ctx.save();
+      ctx.strokeStyle = '#102033';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(x - 16, y - 44); ctx.lineTo(x - 16, y + 44);
+      ctx.moveTo(x + 16, y - 28); ctx.lineTo(x + 16, y + 28);
+      ctx.stroke();
+      ctx.fillStyle = '#d93025';
+      ctx.font = 'bold 18px Arial';
+      ctx.fillText('+', x - 48, y - 24);
+      ctx.fillStyle = '#1769ff';
+      ctx.fillText('−', x + 34, y + 32);
+      ctx.fillStyle = '#102033';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText(`Battery: ${V} V`, x - 52, y + 70);
+      ctx.restore();
+    }
+
+    function drawResistor(x, y, w, h, label) {
+      ctx.save();
+      ctx.fillStyle = '#fff8e6';
+      ctx.strokeStyle = '#f57c00';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.roundRect(x - w / 2, y - h / 2, w, h, 10);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#102033';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, x, y + 5);
+      ctx.restore();
+    }
+
+    function drawMeter(x, y, label, value, color) {
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(x, y, 33, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = color;
+      ctx.font = 'bold 20px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, x, y + 6);
+      ctx.fillStyle = '#102033';
+      ctx.font = 'bold 12px Arial';
+      ctx.fillText(value, x, y + 50);
+      ctx.restore();
+    }
+
+    function drawWatermark() {
+      ctx.save();
+      ctx.globalAlpha = 0.18;
+      ctx.fillStyle = '#0b2d5c';
+      ctx.textAlign = 'right';
+      ctx.font = 'bold 22px Arial';
+      ctx.fillText('Dr AI Academy', canvas.width - 30, canvas.height - 42);
+      ctx.font = '12px Arial';
+      ctx.fillText('AI Powered Physics for NEET', canvas.width - 30, canvas.height - 23);
+      ctx.restore();
+    }
+
+    function drawGraph(p) {
+      if (!showGraphEl.checked) return;
+      const gx = 610, gy = 365, gw = 300, gh = 245;
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,255,255,0.97)';
+      ctx.strokeStyle = '#dbe6f6';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.roundRect(gx, gy, gw, gh, 14); ctx.fill(); ctx.stroke();
+
+      const ox = gx + 45, oy = gy + gh - 42;
+      const xMax = 10;
+      const yMax = 32;
+      ctx.strokeStyle = '#102033'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(gx + gw - 18, oy); ctx.moveTo(ox, oy); ctx.lineTo(ox, gy + 25); ctx.stroke();
+      ctx.fillStyle = '#102033'; ctx.font = 'bold 13px Arial';
+      ctx.fillText('V-I Graph', gx + 18, gy + 24);
+      ctx.fillText('I (A)', gx + gw - 48, oy + 28);
+      ctx.fillText('V (V)', ox - 34, gy + 34);
+
+      // Ohmic straight line V = R_eq I.
+      const maxIForLine = Math.min(xMax, yMax / p.req);
+      const x2 = ox + (maxIForLine / xMax) * (gw - 72);
+      const y2 = oy - ((p.req * maxIForLine) / yMax) * (gh - 78);
+      ctx.strokeStyle = '#7b1fa2'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.fillStyle = '#7b1fa2'; ctx.font = 'bold 12px Arial';
+      ctx.fillText('slope = R', x2 - 70, y2 - 8);
+
+      const px = ox + Math.min(p.I, xMax) / xMax * (gw - 72);
+      const py = oy - Math.min(p.V, yMax) / yMax * (gh - 78);
+      ctx.fillStyle = '#d93025';
+      ctx.beginPath(); ctx.arc(px, py, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#102033'; ctx.font = 'bold 12px Arial';
+      ctx.fillText(`(${p.I.toFixed(2)}, ${p.V.toFixed(0)})`, px + 10, py - 8);
+
+      // Stored graph points.
+      ctx.fillStyle = 'rgba(23,105,255,0.45)';
+      for (const gp of graphPoints) {
+        const gxpt = ox + Math.min(gp.I, xMax) / xMax * (gw - 72);
+        const gypt = oy - Math.min(gp.V, yMax) / yMax * (gh - 78);
+        ctx.beginPath(); ctx.arc(gxpt, gypt, 4, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function getMainPath() {
+      return [
+        { x: 170, y: 210 }, { x: 170, y: 120 }, { x: 760, y: 120 },
+        { x: 760, y: 300 }, { x: 760, y: 300 }, { x: 170, y: 300 },
+        { x: 170, y: 210 }
+      ];
+    }
+
+    function drawSingleOrSeries(p) {
+      const path = getMainPath();
+      drawWirePath(path);
+      drawBattery(170, 210, p.V);
+      drawMeter(275, 120, 'A', `${p.I.toFixed(2)} A`, '#0f9d58');
+      drawMeter(580, 230, 'V', `${p.V.toFixed(1)} V`, '#d93025');
+
+      const startX = p.type === 'series' ? 430 - (p.count - 1) * 55 : 520;
+      for (let i = 0; i < (p.type === 'series' ? p.count : 1); i++) {
+        drawResistor(startX + i * 110, 120, 74, 42, `R${i + 1}\n${p.R}Ω`);
+      }
+
+      // Voltmeter parallel leads around main resistor/series group.
+      ctx.save();
+      ctx.strokeStyle = '#d93025'; ctx.lineWidth = 2.5; ctx.setLineDash([7, 6]);
+      ctx.beginPath();
+      ctx.moveTo(startX - 45, 120); ctx.lineTo(startX - 45, 230); ctx.lineTo(580, 230); ctx.lineTo(580, 160); ctx.lineTo(startX + (p.type === 'series' ? (p.count - 1) * 110 : 0) + 45, 160); ctx.lineTo(startX + (p.type === 'series' ? (p.count - 1) * 110 : 0) + 45, 120);
+      ctx.stroke(); ctx.restore();
+
+      if (showCurrentEl.checked) drawArrow(320, 92, 395, 92, '#0f9d58', 'conventional current');
+      if (showElectronsEl.checked) drawArrow(395, 332, 315, 332, '#f57c00', 'electron flow');
+      drawParticles([path], p);
+    }
+
+    function drawParallel(p) {
+      const left = 170, right = 760, top = 115, bottom = 350;
+      drawBattery(left, 235, p.V);
+      drawMeter(285, top, 'A', `${p.I.toFixed(2)} A`, '#0f9d58');
+
+      const mainPath = [
+        { x: left, y: 235 }, { x: left, y: top }, { x: right, y: top },
+        { x: right, y: bottom }, { x: left, y: bottom }, { x: left, y: 235 }
+      ];
+      drawWirePath(mainPath);
+
+      const branchPaths = [];
+      const gap = p.count === 1 ? 0 : 165 / (p.count - 1);
+      for (let i = 0; i < p.count; i++) {
+        const y = 165 + i * gap;
+        const b = [{ x: 330, y }, { x: 650, y }];
+        drawWirePath(b);
+        drawResistor(490, y, 80, 40, `R${i + 1}\n${p.R}Ω`);
+        branchPaths.push([{ x: 330, y }, { x: 650, y }]);
+        ctx.save(); ctx.fillStyle = '#102033'; ctx.font = 'bold 13px Arial';
+        ctx.fillText(`I${i + 1} = ${p.branchCurrent.toFixed(2)} A`, 668, y + 5); ctx.restore();
+      }
+
+      // Voltmeter across parallel network.
+      drawMeter(490, 420, 'V', `${p.V.toFixed(1)} V`, '#d93025');
+      ctx.save();
+      ctx.strokeStyle = '#d93025'; ctx.lineWidth = 2.5; ctx.setLineDash([7, 6]);
+      ctx.beginPath();
+      ctx.moveTo(330, 165); ctx.lineTo(330, 420); ctx.lineTo(457, 420);
+      ctx.moveTo(650, 165); ctx.lineTo(650, 420); ctx.lineTo(523, 420);
+      ctx.stroke(); ctx.restore();
+
+      if (showCurrentEl.checked) drawArrow(330, 88, 410, 88, '#0f9d58', 'conventional current');
+      if (showElectronsEl.checked) drawArrow(420, 382, 335, 382, '#f57c00', 'electron flow');
+      drawParticles([mainPath, ...branchPaths], p);
+    }
+
+    function drawCanvas() {
+      const p = getParams();
+      updateUI(p);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Background grid.
+      ctx.save(); ctx.strokeStyle = '#eef3fb'; ctx.lineWidth = 1;
+      for (let x = 0; x <= canvas.width; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+      for (let y = 0; y <= canvas.height; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+      ctx.restore();
+
+      ctx.save();
+      ctx.fillStyle = '#102033'; ctx.font = 'bold 22px Arial'; ctx.fillText("Ohm's Law and Simple Circuit", 28, 38);
+      ctx.font = '15px Arial'; ctx.fillStyle = '#637083'; ctx.fillText('Observe V = IR, meter connections, current direction, and V-I graph.', 28, 62);
+      ctx.restore();
+
+      if (p.type === 'parallel') drawParallel(p); else drawSingleOrSeries(p);
+      drawGraph(p);
+
+      // Formula card on canvas.
+      if (showFormulaEl.checked) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.strokeStyle = '#dbe6f6'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(35, 460, 520, 160, 16); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#102033'; ctx.font = 'bold 17px Arial'; ctx.fillText('NEET Formula Focus', 55, 490);
+        ctx.font = '15px Arial';
+        ctx.fillText('V = IR  |  I = V/R  |  P = VI = I²R = V²/R', 55, 520);
+        ctx.fillText('Ammeter: series connection  |  Voltmeter: parallel connection', 55, 548);
+        ctx.fillText(p.type === 'parallel' ? 'Parallel: same voltage, current divides.' : p.type === 'series' ? 'Series: same current, voltage divides.' : 'Single resistor: direct application of I = V/R.', 55, 576);
+        ctx.fillText(`Current = ${p.I.toFixed(2)} A, Equivalent R = ${p.req.toFixed(2)} Ω`, 55, 604);
+        ctx.restore();
+      }
+
+      drawWatermark();
+    }
+
+    function animate(timestamp) {
+      if (lastFrame === null) lastFrame = timestamp;
+      const dt = Math.min(0.04, (timestamp - lastFrame) / 1000);
+      lastFrame = timestamp;
+      const p = getParams();
+      if (isPlaying) particleOffset += dt * Math.max(0.1, p.I) * 0.12 * p.scale;
+      drawCanvas();
+      requestAnimationFrame(animate);
+    }
+
+    function resetSimulation() {
+      isPlaying = false;
+      particleOffset = 0;
+      lastFrame = null;
+      graphPoints = [];
+      drawCanvas();
+    }
+
+    function addGraphPoint() {
+      const p = getParams();
+      graphPoints.push({ I: p.I, V: p.V });
+      if (graphPoints.length > 40) graphPoints.shift();
+    }
+
+    [circuitTypeEl, voltageEl, resistanceEl, currentScaleEl, resistorCountEl, showElectronsEl, showCurrentEl, showGraphEl, showFormulaEl].forEach(el => {
+      el.addEventListener('input', () => { lastFrame = null; addGraphPoint(); drawCanvas(); });
+      el.addEventListener('change', () => { lastFrame = null; addGraphPoint(); drawCanvas(); });
+    });
+
+    playBtn.addEventListener('click', () => { isPlaying = true; lastFrame = null; });
+    pauseBtn.addEventListener('click', () => { isPlaying = false; });
+    resetBtn.addEventListener('click', resetSimulation);
+    addBtn.addEventListener('click', () => { resistorCountEl.value = Math.min(4, Number(resistorCountEl.value) + 1); addGraphPoint(); drawCanvas(); });
+    removeBtn.addEventListener('click', () => { resistorCountEl.value = Math.max(1, Number(resistorCountEl.value) - 1); addGraphPoint(); drawCanvas(); });
+    formulaBtn.addEventListener('click', () => { showFormulaEl.checked = !showFormulaEl.checked; formulaBox.classList.toggle('hidden', !showFormulaEl.checked); drawCanvas(); });
+    clearGraphBtn.addEventListener('click', () => { graphPoints = []; drawCanvas(); });
+
+    addGraphPoint();
+    drawCanvas();
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
